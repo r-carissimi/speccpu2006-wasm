@@ -1,0 +1,606 @@
+--- a/config/wasm.cfg	1970-01-01 00:00:00.000000000 +0000
++++ b/config/wasm.cfg	2025-03-19 20:15:21.591329299 +0000
+@@ -0,0 +1,377 @@
++# This is a sample config file. It was tested with:
++#
++#      Compiler name/version:       [gcc, 4.2 snapshot 20060325]
++#      Compiler name/version:       [gcc, 4.2 snapshot 20060617]
++#      Operating system version:    [SLES9 SP3 for AMD64]
++#      Operating system version:    [SUSE 10.1 for AMD64]
++#      Hardware:                    [Opteron]
++#
++# If your platform uses different versions, different
++# hardware or operates in a different mode (for
++# example, 32- vs. 64-bit mode), there is the possibiliy
++# that this configuration file may not work as-is.
++#
++# Note that issues with compilation should be directed
++# to the compiler vendor. Information about SPEC techncial
++# support can be found in the techsupport document in the
++# Docs directory of your benchmark installation.
++#
++# Also note that this is a sample configuration. It
++# is expected to work for the environment in which
++# it was tested; it is not guaranteed that this is
++# the config file that will provide the best performance.
++#
++# Note that you might find a more recent config file for
++# your platform with the posted results at
++# www.spec.org/cpu2006
++####################################################################
++# linux64-amd64-gcc42.cfg
++# FSF's gcc 4.2 config file for
++# AMD64 64-bit (64 bit binaries on 64 bit host)
++# Config file for CPU2006	int and fp Base only
++#####################################################################
++
++ignore_errors = yes
++tune          = base
++ext           = wasm-wasi
++output_format = asc, pdf, Screen
++reportable    = 1
++teeout        = yes
++teerunout     = yes
++hw_avail = Dec-9999
++license_num = 9999
++test_sponsor = Turbo Computers
++prepared_by = 
++tester      =
++test_date = Dec-9999
++
++default=default=default=default:
++#####################################################################
++#
++# Compiler selection
++#
++#####################################################################
++CC           = /opt/wasi-sdk/bin/clang --sysroot /opt/wasi-sdk/share/wasi-sysroot -Wl,--export-all -I/opt/wasi-sdk/lib/clang/19/include/
++CXX          = /opt/wasi-sdk/bin/clang --sysroot /opt/wasi-sdk/share/wasi-sysroot -Wl,--export-all -lstdc++ -I/opt/wasi-sdk/lib/clang/19/include/ 
++FC           = %{gccpath}/bin/gfortran -m64 -I%{gccpath}/include -I/usr/include
++
++## HW config
++hw_model     = Tyan Thunder KKQS Pro (S4882)
++hw_cpu_name  = AMD Opteron 256
++hw_cpu_char  =
++hw_cpu_mhz   = 3000
++hw_fpu       = Integrated
++hw_nchips	= 1
++hw_ncores	= 1
++hw_ncoresperchip= 1
++hw_nthreadspercore = 1
++hw_ncpuorder = 1 chip
++hw_pcache    = 64 KB I + 64 KB D on chip per chip
++hw_scache    = 1 MB I+D on chip per chip
++hw_tcache    = None
++hw_ocache    = None
++hw_memory	= 2 GB (2 x 1GB DDR333 CL2.5)
++hw_disk		= SATA
++hw_vendor	= Tyan
++
++## SW config
++sw_os        = SUSE SLES9 (for AMD64)
++sw_file      = ext3
++sw_state     = runlevel 3
++sw_compiler  = gcc , g++ & gfortran 4.2.0325 (for AMD64)
++sw_avail = Dec-9999
++sw_other = None
++sw_auto_parallel = No
++sw_base_ptrsize = 64-bit
++sw_peak_ptrsize = Not Applicable
++
++
++#####################################################################
++# Optimization
++#####################################################################
++## Base is low opt
++default=base=default=default:
++COPTIMIZE     = -O2
++CXXOPTIMIZE  = -O2 
++FOPTIMIZE    = -O2
++
++notes0100= C base flags: $[COPTIMIZE]
++notes0110= C++ base flags: $[CXXOPTIMIZE]
++notes0120= Fortran base flags: $[FOPTIMIZE]
++
++#####################################################################
++# 32/64 bit Portability Flags - all
++#####################################################################
++
++default=base=default=default:
++notes25= PORTABILITY=-DSPEC_CPU_LP64 is applied to all benchmarks in base.
++PORTABILITY = -DSPEC_CPU_LP64
++
++
++#####################################################################
++# Portability Flags - INT
++#####################################################################
++
++400.perlbench=default=default=default:
++notes35    = 400.perlbench: -DSPEC_CPU_LINUX_X64
++CPORTABILITY= -DSPEC_CPU_LINUX_X64
++
++462.libquantum=default=default=default:
++notes60= 462.libquantum: -DSPEC_CPU_LINUX
++CPORTABILITY= -DSPEC_CPU_LINUX
++
++483.xalancbmk=default=default=default:
++CXXPORTABILITY= -DSPEC_CPU_LINUX
++
++# NOT WORKING - Requires exception proposal
++400.perlbench:
++PORTABILITY= --std=c90 -mllvm -wasm-enable-sjlj -D_WASI_EMULATED_SIGNAL -lwasi-emulated-signal
++
++401.bzip2:
++PORTABILITY= -D_WASI_EMULATED_SIGNAL -lwasi-emulated-signal -Wno-int-conversion
++
++# Requires exception proposal
++403.gcc:
++PORTABILITY= --std=c90 -D_WASI_EMULATED_SIGNAL -lwasi-emulated-signal -mllvm -wasm-enable-sjlj -Wno-deprecated-non-prototype -Wno-implicit-function-declaration -Wno-int-conversion -D_WASI_EMULATED_PROCESS_CLOCKS -lwasi-emulated-process-clocks
++
++# 410.bwaves: FORTRAN
++# 416.gamess: FORTRAN
++
++# 429.mcf: WORKS
++# 433.milc: WORKS
++
++# 434.zeusmp: FORTRAN
++# 435.gromacs: FORTRAN
++# 436.cactusADM: FORTRAN
++# 437.leslie3d: FORTRAN
++
++444.namd: 
++PORTABILITY= -std=c++14 -Wno-register
++
++# 445.gobmk: NOT WORKING - Due to dynamic code rewriting?
++
++# NOT WORKING - Reference to pair is ambiguous
++447.dealII:
++PORTABILITY= -std=c++14 -Wno-deprecated -D_GLIBCXX_USE_CXX11_ABI=0 -Wno-ambiguous-member-template 
++
++# NOT WORKING - error: invalid operands to binary expression ('istream' and 'int')
++450.soplex:
++PORTABILITY= -fno-rtti
++
++# NOT WORKING - error: entry symbol not defined (pass --no-entry to suppress): _start
++453.povray:
++PORTABILITY= -std=c++14 -nostartfiles -fno-rtti -D_LIBCPP_HAS_NO_THREADS -D_LIBCPP_HAS_NO_FILESYSTEM -D_LIBCPP_HAS_NO_WIDE_CHARACTERS -Wno-unused-command-line-argument
++
++# 454.calculix: FORTRAN
++
++# NOT WORKING - error: ssi.o: undefined symbol: system
++456.hmmer:
++PORTABILITY= -D_WASI_EMULATED_SIGNAL -lwasi-emulated-signal -Wno-implicit-function-declaration
++
++# NOT WORKING but COMPILING - wasm trap: out of bounds memory access
++458.sjeng:
++PORTABILITY= -D_WASI_EMULATED_SIGNAL -lwasi-emulated-signal
++
++# 459.GemsFDTD: FORTRAN
++
++# 462.libquantum: WORKS
++
++# 464.h264ref: NOT WORKING but COMPILING - wasm trap: wasm `unreachable` instruction executed
++
++# 465.tonto: FORTRAN
++
++# 470.lbm: WORKS
++
++# NOT WORKING - EtherAppCli.o: undefined symbol: __cxa_allocate_exception
++471.omnetpp:
++PORTABILITY= -D_WASI_EMULATED_SIGNAL -lwasi-emulated-signal -mllvm -wasm-enable-sjlj -fwasm-exceptions
++
++473.astar:
++PORTABILITY= --std=c++03
++
++# 481.wrf: FORTRAN
++
++# NOT WORKING - error: variable has incomplete type 'struct rlimit'
++482.sphinx3:
++PORTABILITY= --std=c90 -Wno-int-conversion -D_WASI_EMULATED_PROCESS_CLOCKS -lwasi-emulated-process-clocks
++
++# 483.xalancbmk: NOT WORKING - fatal error: 'linux/limits.h' file not found
++
++# 998.specrand and 999.specrand: WORKS but didn't understand what they do
++
++#####################################################################
++# Portability Flags - FP
++#####################################################################
++481.wrf=default=default=default:
++wrf_data_header_size = 8
++CPORTABILITY = -DSPEC_CPU_CASE_FLAG -DSPEC_CPU_LINUX
++#####################################################################
++
++__MD5__
++401.bzip2=base=amd64-m64-gcc42-nn=default:
++# Last updated Wed Mar 19 14:04:25 2025
++optmd5=53343daab250d62a1524c5f0493bf634
++baggage=
++compile_options=\
++@eNrFUstOwzAQvOcrVjmzWPRG1VbKi8qQ1hFJVMElysMqBmNXccrj73HSolI4guicbO2Mdz07AVsk\
++YyB605HX0gg0zROphCK1LNUaEM27abXuvjHMQ9ny/XVPwJU8Q+RvG912WEoJSI81UlS7V8nFJRGq\
++ltuGE8AaUIMlCq3MuQYM0yQKiiDJ7XEZRn4+BwtkI9gBw2LlpbSIFnnsZVFYpHS+9GJAOXTiz1tZ\
++drxBI9aqtFOslEahOqy1euGtsW3gExOjt23NZ04whiCYuidzwR0mYP41S7Kpe2SJ69j1WDeuYm+e\
++2tpPe1yH9eIkowt6H1kKGw2ihN1mnk9jmt31ut+65joxXd6cMir7FPxdACa6euR1Z2ZwwMH5fidx\
++eNJU/NNih4+yvI/el9x9AG7mUlw=
++exemd5=d0d6e9b7e5da50abb6ceedcd2e90e9bd
++
++401.bzip2=base=wasm-wasi=default:
++# Last updated Wed Mar 19 14:19:24 2025
++optmd5=53343daab250d62a1524c5f0493bf634
++baggage=
++compile_options=\
++@eNrFUstOwzAQvOcrVjmzWPRG1VbKi8qQ1hFJVMElysMqBmNXccrj73HSolI4guicbO2Mdz07AVsk\
++YyB605HX0gg0zROphCK1LNUaEM27abXuvjHMQ9ny/XVPwJU8Q+RvG912WEoJSI81UlS7V8nFJRGq\
++ltuGE8AaUIMlCq3MuQYM0yQKiiDJ7XEZRn4+BwtkI9gBw2LlpbSIFnnsZVFYpHS+9GJAOXTiz1tZ\
++drxBI9aqtFOslEahOqy1euGtsW3gExOjt23NZ04whiCYuidzwR0mYP41S7Kpe2SJ69j1WDeuYm+e\
++2tpPe1yH9eIkowt6H1kKGw2ihN1mnk9jmt31ut+65joxXd6cMir7FPxdACa6euR1Z2ZwwMH5fidx\
++eNJU/NNih4+yvI/el9x9AG7mUlw=
++exemd5=d0d6e9b7e5da50abb6ceedcd2e90e9bd
++
++403.gcc=base=wasm-wasi=default:
++# Last updated Wed Mar 19 18:46:59 2025
++optmd5=7018c24b7ad69998c052768cb9bdcdf3
++baggage=
++compile_options=\
++@eNrtVE1P4zAQvfdXWDkzzcINRJESN1u8pHVEUiG4RKnj7bo4dhS77PLvmaStlo8f0EPxyZ55Hj/r\
++zRvK59kVCW3rw7+VU+Dq53ClTCh0ZdYEwL26zlr/CeH+VJ3cH/cAeNBnAPJfazsPldYE2Mc7Wq12\
++VcPzy1AZobe1DAkIApYgUFnjxpbANM8SWtJsidvFNImXM6w0JoQAvyC7hax8PRGXPxBSPkQ5K5P5\
++Mo2KZFrmbLaIUgJ6eFY2W115WYNTa1MhpUbrl4YAJhuQplppCW6jN0jeWKhl20kx4I010HbWW//a\
++yl1WNa1WQnn4vTWiZ4t4/E5X9fs9xHgQ1rzIzg2xz+Sye06TPC9pyuld/oUkPiikcyC0Fc+OHNa1\
++s9tOyJsRvSKUToKjaRUMDHj8i2fFJPggXDDCJkLNfqbRLMfcVxEHRJws6G15ALFxMOJ9xaxgc/aU\
++YIhfDLiM3xdRzFJWPGLwFNQORilb3B3TiHuDnZS3ru1qI4V3N/3vdXMI/+/rvuPT6VE99+2Qg0NQ\
++i3lU3JYpi/vxoZtgJw9f9uPo3Sx6A1uCRFs=
++exemd5=379b767231ba6f5c6dff8a2a6972633a
++
++444.namd=base=wasm-wasi=default:
++# Last updated Wed Mar 19 18:57:28 2025
++optmd5=530bcce732a16fa72569d50de534ddb1
++baggage=
++compile_options=\
++@eNrNUstOwzAQvOcrVr6WxSriQtVUah5UhrSO2kQULigPqxisuIpTAX+PmwSVghAHLt2Lvfbs2jOz\
++Pp/HI6B629DXzEg05QvNZUULlVUbQDTvpta6+YYwT1kt+rQH4J06QxRvW103mCkFqExTFoMBIDsu\
++VjLv2tPhFZVVoXaloABYAGqwSKkrc64Bg1Uc+o9+nNrtIgi9dAY2kF+0i23u2u7DS/typbEWG2ka\
++UUMXY6N3dSEmjj8Cf712yQkwJP1nuHfD48QlR4SJY22wXK+j6Wxl736SJw7vyuOEzdlDaEFWirYu\
++5stk6rGIJff29BdliBOxxe1peP1p4x8uwljnz6JozAQOcdBsr2cUnIi3/zWn5cLT/Vx8GYoPMv8k\
++WQ==
++exemd5=53bde362eabe8b452a229a11e6b4c3b5
++
++458.sjeng=base=wasm-wasi=default:
++# Last updated Wed Mar 19 19:34:54 2025
++optmd5=b7e09bdce23779ccd5ae22a49c5ac6c7
++baggage=
++compile_options=\
++@eNrFUl1PgzAUfedX3PDstXFvLtsSBrhUGW0EsugL4aOZaKULhaj/3sJY5vRJE7Pz1KbntD3nXJet\
+++RSI2rXkLdMV6vKF5FVNCpnVW0DUH7pRqv3G0E9ZI8btSMCNvEAU7zvVtJhJCUhPNbLK97eSq2tS\
++1YXsSkEAC0AFhlipWl8qQC/ivpu6PDHL0POXyQoMkE1gD/TSjRPR1F8ngRP7XhrRVegEgHJ4Sbx2\
++MmtFibra1pmEA2ZadU0hFpY7Bded22dzbA8/YMtbxuO5fWLftkwVxvlN4Kwic/YzCttivZjHdE0f\
++fUNhk0HE2X3sLGlA44de95uEbCug4d05R2Bs92/FzlT+LIpWL+CIY6J91oF31rb/obDBFEv68fky\
++O5/q4jSs
++exemd5=153e1e30c199f99e580c263afb3e7099
++
++462.libquantum=base=wasm-wasi=default:
++# Last updated Wed Mar 19 19:36:13 2025
++optmd5=332475ca23bdaa7879fbc1c517358d59
++baggage=
++compile_options=\
++@eNrFUl1LwzAUfe+vCHn2GhwiOLZBv5zRdgmuxY+X0XZFq1kzmg713y9pK1sVwRdpXpJLzrncc851\
++WcjHiMhtTd4TVYBav5G0KEkmkvIZAahPVUlZf0Ool6TKu7IDwL04Acg/trKqIRECAe1zRJG2XcnZ\
++JSnKTOzWOUGQIZBIAwtZqlOJwFty3125PNbPhec78RzpA2yE2nMArAJ+cd6r6SJ+6GBoouSuyvKZ\
++5Y6R607xYBJxMwFzbhiPprinF1vaez35VWDPl/rvp3ZsMUPmEQ3pk68hbNSQOLuLbIcGNHo85jWW\
++dF1/QxiTsKWv2yFz7yL9Y5oTmb7mWa1mhic2XxkfnDQeB96gKf9TUFpYaEfXunTMiogNbrWy2GzT\
++0SrtAVrkKvU=
++exemd5=5d61a3fcb3f19ac772ac26f3f6a90a64
++
++464.h264ref=base=wasm-wasi=default:
++# Last updated Wed Mar 19 19:37:07 2025
++optmd5=9e7ee2b67a9717b33c042722a2ae977a
++baggage=
++compile_options=\
++@eNrFkV9PgzAUxd/5FE2fvTYuxsRlWwIFZ7WsjYMYfSHAiKIdXSiL+u0tf5ZtGl982X1q4ZzmnvOj\
++IpRjRPSmIR+pKcGs3klWViRXafWCAMyXqbVufijMa1oXw3UQwKM6Ayg+N7puIFUKATv2qDLrXyUX\
++16SscrVdFQRBjkAjKyx1Zc41An8pA5pQGdvjwg+8eI7sgBihfvaChMurS7SbidHbOi9mDh0jSqf4\
++ZJFwt4Hw7oSMpvgoH3Zs13bzG+7Ol/bf76zYEa1ZRixkz4GViFFnkuIhcj3GWfR06OsqwA5ni/tT\
++Qhz4/IFmorO3Im/MrNWp9e7zvpa2MO6fFNl/Wrdbh250m3DmtTDVGvdBRNxyP4D+DXHIDhc=
++exemd5=e25afa5bbe7605ef967d1b8d00ae1c34
++
++470.lbm=base=wasm-wasi=default:
++# Last updated Wed Mar 19 19:38:51 2025
++optmd5=344c525162ffb37a619534879fa02d91
++baggage=
++compile_options=\
++@eNrFkV9PgzAUxd/5FE2fvTYuxsRlWwIFZ7WsjYMYfSHAiKIdXSiL+u0tf5ZtGl982X1q4ZzmnvOj\
++IpRjRPSmIR+pKcGs3klWViRXafWCAMyXqbVufijMa1oXw3UQwKM6Ayg+N7puIFUKATv2qDLrXyUX\
++16SscrVdFQRBjkAjKyx1Zc41An8pA5pQGdvjwg+8eI7sgBihfvaChMurS7SbidHbOi9mDh0jSqf4\
++ZJFwt4Hw7oSMpvgoH3Zs13bzG+7Ol/bf76zYEa1ZRixkz4GViFFnkuIhcj3GWfR06OsqwA5ni/tT\
++Qhz4/IFmorO3Im/MrNWp9e7zvpa2MO6fFNl/Wrdbh250m3DmtTDVGvdBRNxyP4D+DXHIDhc=
++exemd5=27fcff0086e6f02d6d7b5ae10f9b9eda
++
++473.astar=base=wasm-wasi=default:
++# Last updated Wed Mar 19 19:55:11 2025
++optmd5=b9b933e7636ecd766d6d0d180f5bfac8
++baggage=
++compile_options=\
++@eNrNUslOwzAQvecrRrmWwSwnqqZSNoohjS2aisIlyiYIWHEVpwL+HjcNSktunDIX2+M323vjsiWf\
++ApHbhnwmqkSVf5C0rEgmkuoVENW3qqVs/iDUW1IX3bMD4JM4Qyy+trJuMBECUKgmzyYTQHoaLMr0\
++kJ5c3pCyysQuLwgAZoASNLKUlTqXgN6K+27s8rW+hp7vrBdHvjigURT4sR961A5Bh7Mr2B+oq1q6\
++7MU1HGym5K7OirnhTsHdbCxzBMOaXTPMuWc8ssyT2U1DK6JHvA3sxUr/DXloEY4funfxAHRKjGmw\
++QyEe0SV98TVS89TGc/YY2Q7V8Gft7WkzjYCGD+PYiV9Zh6rCTKbvRdaoOfTWc7jnN/BGovU/JGjb\
++Z+v9ahztxQ+oriNW
++exemd5=2d61c852d22e36c37690835c4c6f1b83
++
++999.specrand=base=wasm-wasi=default:
++# Last updated Wed Mar 19 20:05:17 2025
++optmd5=9bf440db1721f9c00c66a7803a31c6c2
++baggage=
++compile_options=\
++@eNrFUU9LwzAcvfdT/MjZn8EhgmMbrGkd0W4JrkX0MtqsaDU0o+lQv71pV+mmePHSd0rIe+H9YWIp\
++x0DNrqbvqS3Qbt9oVpRU6bR8BkT7aStj6h8M+5JWeXftCPigzxDzj52paky1BuSnGl1kh1/pxTUt\
++SqX325wCKkADjliY0p4bwGAtQ7ZhMnHHVRD6yQIcUIzggJ6wieTVJXxjYs2+UvnMY2NgbEoGi0Ra\
++B8K/FTKekpN8xHNdO+c30Xyxdm+/sxJPNGIZ8yV/Ch1FjFqRFPfx3OcRjx+PdW0FxIv46m7IEbt9\
++/phmYrLXXNV2Bj36Tpq2omDQvf5TeetaJM3CR/N+AXGfCDA=
++exemd5=e4ac2cbbee2569054a446c01f388c0f3
++
++998.specrand=base=wasm-wasi=default:
++# Last updated Wed Mar 19 20:06:03 2025
++optmd5=9527739c23aba5095c21ea06f92a8fd2
++baggage=
++compile_options=\
++@eNrFUU9LwzAcvfdT/MjZn8EhgmMbrGkd0W4JrkX0MtqsaDU0o+lQv71pV+mmePHSd0rIe+H9YWIp\
++x0DNrqbvqS3Qbt9oVpRU6bR8BkT7aStj6h8M+5JWeXftCPigzxDzj52paky1BuSnGl1kh1/pxTUt\
++SqX325wCKkADjliY0p4bwGAtQ7ZhMnHHVRD6yQIcUIzggJ6wieTVJXxjYs2+UvnMY2NgbEoGi0Ra\
++B8K/FTKekpN8xHNdO+c30Xyxdm+/sxJPNGIZ8yV/Ch1FjFqRFPfx3OcRjx+PdW0FxIv46m7IEbt9\
++/phmYrLXXNV2Bj36Tpq2omDQvf5TeetaJM3CR/N+AXGfCDA=
++exemd5=e4ac2cbbee2569054a446c01f388c0f3
++
++429.mcf=base=wasm-wasi=default:
++# Last updated Wed Mar 19 20:15:14 2025
++optmd5=50edac609d911e69cfa3586aeadffe8f
++baggage=
++compile_options=\
++@eNrFUstOwzAQvOcrLJ8xFhVComorJU5oDWlsNa4quFhpGkHAjas4FfD3OGn6RFy4xKf1ena9M7OE\
++TXkfYL2p8GdicmRWH3iZFzhVSfEKEDLfptS6ukCYt6TM2msLQAt1hVD2tdFlhRKlAKLnNSpf7rri\
++m3ucF6narjIMUAqQBhaY68Jca4D8mAdEEj63YeQH3nwMbLRwIyFj4RPJZ0wwm2I9sDvHChnyu1uw\
++PwOjt2WajRzSB4QMYWccYTMB8x4ZF0N4Rhg6Vnw7+UPojmP79pt8g/CCiEwkOaAu1IAOqz/ggk7p\
++S2ABrNeUcTYTrkdDKp5PezcyQSek0VOXzrce/mHfQC/fs7Qyoxqn1vv0Ubpa1NDv1Nb/qG6nnrpi\
++IkPq1VaqNdwRYfN6N04W4wedFx0R
++exemd5=de191b823384a3f47ddd784ecc54f943
++
++433.milc=base=wasm-wasi=default:
++# Last updated Wed Mar 19 20:15:21 2025
++optmd5=a88de67698f0232cdbeb087ef4ccf8f9
++baggage=
++compile_options=\
++@eNrFUk9PwjAcve9TND1bGokxkQDJ1g2YbmuzFo1eljEWnZaVrCPqt7cdEEDjhQs99M+vry+v7/0I\
++jdkAYLVu8WeuK6SXH3hR1biQef0KENLfulGq/YXQb3lT7o47AHqSVwiVX2vVtCiXEqDw9I2sFltW\
++fH2Hq7qQm2WJASoAUsAAK1XrngLI5ywgGWFzs038wJtPDVPPHCaJnVwuzEJoMk1dPxMxyx4DImjK\
++TdXnkctnXTEKkwcOAEC0D7bjQJxF7PYG7MdQq01TlGOHDAAhI3gxK2CngHr3lIkRPPEFOiYjo3wS\
++uVNu7v561CG8ICGzbA860zToUCuDiTAOXwLDQ/sdOaOpcL0wCsXzsYLOTOjYp5dso13S/4Q8VIv3\
++smj12OLkal8+GGytj/yLhn+O60Z17IqZCc6zicsV3H6Ezm0HHbXPD4mzMVA=
++exemd5=52484a040db727efd3842447fefd674f
++
+--- a/config/native.cfg	1970-01-01 00:00:00.000000000 +0000
++++ b/config/native.cfg	2025-03-19 21:07:11.848500644 +0000
+@@ -0,0 +1,158 @@
++# This is a sample config file. It was tested with:
++#
++#      Compiler name/version:       [gcc, 4.2 snapshot 20060325]
++#      Compiler name/version:       [gcc, 4.2 snapshot 20060617]
++#      Operating system version:    [SLES9 SP3 for AMD64]
++#      Operating system version:    [SUSE 10.1 for AMD64]
++#      Hardware:                    [Opteron]
++#
++# If your platform uses different versions, different
++# hardware or operates in a different mode (for
++# example, 32- vs. 64-bit mode), there is the possibiliy
++# that this configuration file may not work as-is.
++#
++# Note that issues with compilation should be directed
++# to the compiler vendor. Information about SPEC techncial
++# support can be found in the techsupport document in the
++# Docs directory of your benchmark installation.
++#
++# Also note that this is a sample configuration. It
++# is expected to work for the environment in which
++# it was tested; it is not guaranteed that this is
++# the config file that will provide the best performance.
++#
++# Note that you might find a more recent config file for
++# your platform with the posted results at
++# www.spec.org/cpu2006
++####################################################################
++# linux64-amd64-gcc42.cfg
++# FSF's gcc 4.2 config file for
++# AMD64 64-bit (64 bit binaries on 64 bit host)
++# Config file for CPU2006	int and fp Base only
++#####################################################################
++
++ignore_errors = yes
++tune          = base
++ext           = native
++output_format = asc, pdf, Screen
++reportable    = 1
++teeout        = yes
++teerunout     = yes
++hw_avail = Dec-9999
++license_num = 9999
++test_sponsor = Turbo Computers
++prepared_by = 
++tester      =
++test_date = Dec-9999
++
++default=default=default=default:
++#####################################################################
++#
++# Compiler selection
++#
++#####################################################################
++CC           = /usr/bin/gcc
++CXX          = /usr/bin/g++
++FC           = /usr/share/gfortran
++
++## HW config
++hw_model     = Tyan Thunder KKQS Pro (S4882)
++hw_cpu_name  = AMD Opteron 256
++hw_cpu_char  =
++hw_cpu_mhz   = 3000
++hw_fpu       = Integrated
++hw_nchips	= 1
++hw_ncores	= 1
++hw_ncoresperchip= 1
++hw_nthreadspercore = 1
++hw_ncpuorder = 1 chip
++hw_pcache    = 64 KB I + 64 KB D on chip per chip
++hw_scache    = 1 MB I+D on chip per chip
++hw_tcache    = None
++hw_ocache    = None
++hw_memory	= 2 GB (2 x 1GB DDR333 CL2.5)
++hw_disk		= SATA
++hw_vendor	= Tyan
++
++## SW config
++sw_os        = SUSE SLES9 (for AMD64)
++sw_file      = ext3
++sw_state     = runlevel 3
++sw_compiler  = gcc , g++ & gfortran 4.2.0325 (for AMD64)
++sw_avail = Dec-9999
++sw_other = None
++sw_auto_parallel = No
++sw_base_ptrsize = 64-bit
++sw_peak_ptrsize = Not Applicable
++
++
++#####################################################################
++# Optimization
++#####################################################################
++## Base is low opt
++default=base=default=default:
++COPTIMIZE     = -O2
++CXXOPTIMIZE  = -O2 
++FOPTIMIZE    = -O2
++
++notes0100= C base flags: $[COPTIMIZE]
++notes0110= C++ base flags: $[CXXOPTIMIZE]
++notes0120= Fortran base flags: $[FOPTIMIZE]
++
++#####################################################################
++# 32/64 bit Portability Flags - all
++#####################################################################
++
++default=base=default=default:
++notes25= PORTABILITY=-DSPEC_CPU_LP64 is applied to all benchmarks in base.
++PORTABILITY = -DSPEC_CPU_LP64
++
++
++#####################################################################
++# Portability Flags - INT
++#####################################################################
++
++400.perlbench=default=default=default:
++notes35    = 400.perlbench: -DSPEC_CPU_LINUX_X64
++CPORTABILITY= -DSPEC_CPU_LINUX_X64
++
++462.libquantum=default=default=default:
++notes60= 462.libquantum: -DSPEC_CPU_LINUX
++CPORTABILITY= -DSPEC_CPU_LINUX
++
++483.xalancbmk=default=default=default:
++CXXPORTABILITY= -DSPEC_CPU_LINUX
++
++
++#####################################################################
++# Portability Flags - FP
++#####################################################################
++481.wrf=default=default=default:
++wrf_data_header_size = 8
++CPORTABILITY = -DSPEC_CPU_CASE_FLAG -DSPEC_CPU_LINUX
++#####################################################################
++
++__MD5__
++401.bzip2=base=amd64-m64-gcc42-nn=default:
++# Last updated Wed Mar 19 13:38:45 2025
++optmd5=273184d39eabc0bab2e9ee7f835664cb
++baggage=
++compile_options=\
++@eNqdUE0LgkAQvfsrhr2bINFBVNDVZGt1l9RDXQQXCTu44cf/b7VCM7r0mMOwO2/ee4NZzC0whq41\
++yroxrkKArkqCvPe1bLqNBD1IeYgLzHPVJkHo5xEo6MyEJ+aBgvLdFt6wOzm0onI1bAHGDlqqoOmR\
+++QfGMwd9SCJNOVLL9tSLUvX3LY80NpJ5RmJyCdUIMycSZ6fM8wkl2XnJm1whjZLkuIr6SvEjgC3L\
++WyX6zoUZs80xAA3Wqf4xNi1i+XiHxREeNNBtiQ==
++exemd5=bc97b0a6b644a41bdd77498b215c690b
++
++445.gobmk=base=amd64-m64-gcc42-nn=default:
++# Last updated Wed Mar 19 19:00:39 2025
++optmd5=99eb4aadf44512d6a50c38d03bdada68
++baggage=
++compile_options=\
++@eNqdkFFrwyAQx9/zKQ7f00AZeyhtIRqbuJkoqxlsL0JdGBlpHE3z/afJ2qYde9gOlVOP/93/R0Qu\
++FxD13SHa1W30bgyEblmwn8fatt3MQphsJSWayNKlRUJxmboki5+pJqLYsFRnELKZ3+MR1a1p+rfK\
++X845QCjmMMZFUXN5fwenWHa2P5hqHZAFELJC07HQ8Cjwg5Bqha5mRIGz4MQ2PE637u/nvEMFpgXJ\
++9LnojwZQIHx/qVjOXqkTEPNBVYonFWPGmXqZth6MoYCz4vEG7zeIXxgs7e6jMsdu7eua/en5YtZj\
++4Mktm//M5oTyWGWaM+yBNHs0aovSA57Q/QJ0tpOX
++exemd5=3617a6739faf01cbd36aa40b79523061
++
+--- a/tools/src/specinvoke/unix.c	2005-12-13 00:22:38.000000000 +0000
++++ b/tools/src/specinvoke/unix.c	2025-03-19 17:12:48.481930753 +0000
+@@ -23,7 +23,6 @@
+   si->invoke_args[0] = "/bin/sh";
+   si->invoke_args[1] = "-c";
+   si->invoke_args[2] = "replace_me";
+-  si->invoke_args[3] = 0;
+   si->command_ptr = &(si->invoke_args[2]);
+   si->shell       = "/bin/sh";
+ }
+@@ -70,6 +69,22 @@
+       cmd = strdup(ci->cmd);
+     }
+ 
++	//WASM
++	// Check if the command should be run with wasmtime
++    if (strstr(cmd, "wasm-wasi") != NULL) {  // Added check for "wasm-wasi"
++        // Prepend "wasmtime" to the command
++        char *wasm_cmd;
++        int cmd_len = strlen("/usr/bin/wasmtime --dir . ") + strlen(cmd) + 1;
++        wasm_cmd = (char *)malloc(cmd_len * sizeof(char));
++        if (wasm_cmd == NULL) {
++            printf("Can't allocate memory for wasmtime command\n");
++            specinvoke_exit(1, si);
++        }
++        snprintf(wasm_cmd, cmd_len, "/usr/bin/wasmtime --dir . %s", cmd);
++        free(cmd);
++        cmd = wasm_cmd;
++    }
++
+     gettime(&(ui->start_time));
+ #if defined(PERFMON)
+     pm_pre_spawn(ci, ui, &(si->pm_state));
+@@ -123,7 +138,7 @@
+ 		fprintf (stderr, "Can't create zero-length temporary filename\n ");
+ 		specinvoke_exit (1, si);
+ 	      }
+-	      infd = open(tmpfile, O_RDWR|O_CREAT|O_TRUNC);
++	      infd = open(tmpfile, O_RDWR|O_CREAT|O_TRUNC, 0644);
+ 	      if (infd < 0) {
+ 		fprintf (stderr, "Can't create %s for stdin: %s(%d)\n",
+ 			 tmpfile, STRERROR(errno), errno);
+@@ -155,7 +170,22 @@
+ #if defined(PERFMON)
+ 	pm_pre_exec(ci, ui, &(si->pm_state));
+ #endif
++
++	//WASM DEBUG
++	fprintf(stderr, "Executing command: %s %s %s\n", si->invoke_args[0], si->invoke_args[1], si->invoke_args[2]);
++
++	char cwd[1024];
++	if (getcwd(cwd, sizeof(cwd)) != NULL) {
++		fprintf(stderr, "Current working directory: %s\n", cwd);
++	} else {
++		perror("getcwd() error");
++	}
++	fflush(stderr);
++
++	//FINISH DEBUG
++
+ 	execve(si->shell, si->invoke_args, env);
++
+     } else { /* Parent */
+ 	ui->pid = pid;
+ #if defined(PERFMON)
