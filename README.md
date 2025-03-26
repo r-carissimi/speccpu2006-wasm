@@ -80,7 +80,7 @@ cd ../../../
 #### 9. Run the WASM-Compatible Benchmarks
 Run the benchmarks with the **test dataset**:
 ```sh
-runspec --config=wasm.cfg --size=test --noreportable --tune=base --iterations=1 bzip2 mcf milc namd libquantum lbm astar
+runspec --config=wasm.cfg --size=test --noreportable --tune=base --iterations=1 bzip2 mcf milc namd libquantum lbm astar gcc
 ```
 
 To run the **full benchmark**, remove `--size=test`. Note that this will take significantly longer.
